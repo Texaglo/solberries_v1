@@ -84,9 +84,11 @@ socketIO.on("connect", ()=>{
 socketIO.on("product", (data) => {
   console.log("data", data);  // { product_id:""}
   if(data?.product_id){
+    console.log("turn on:", data?.product_id)
     LED.writeSync(1);
     setTimeout(()=>{
       LED.writeSync(0);
+      console.log("turn off:", data?.product_id)
     }, 10000)
   }
 });
