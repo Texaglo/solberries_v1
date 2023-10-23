@@ -3,6 +3,7 @@ var Gpio = require('onoff').Gpio;                               //include onoff 
 var LED = new Gpio(4, 'out');                                   //use GPIO pin 4 as output
 var os = require('os');
 
+const { io } = require("socket.io-client");
 const axios = require('axios');
 const express = require("express");
 const cors = require("cors");
@@ -13,6 +14,7 @@ const path = require('path');
 const app = express();
 const router = express.Router();
 
+
 app.use(text());
 app.use(json({limit: '500mb'}));
 app.use(urlencoded({extended: true}));
@@ -22,6 +24,7 @@ app.options("*", cors());
 
 const port = Number(process.env.PORT || 8080);
 const public = path.join(__dirname, "/frontend/build");
+const API = "https://crossmint-backend.texaglo.com";
 
 app.use('/', express.static(public));
 app.use(router)
@@ -70,3 +73,24 @@ process.on('SIGINT', function () {                //on ctrl+c
   LED.unexport();                                 // Unexport LED GPIO to free resources
   process.exit();                                 //exit completely
 });
+
+
+const socketIO = io(API);
+socketIO.on("product", (data) => {
+  console.log("data", data);  // { product_id:""}
+  if(data?.product_id){
+    LED.writeSync(1);
+    setTimeout(()=>{
+      LED.writeSync(0);
+    }, 10000)
+  }
+});
+
+socketIO.on("disconnect", () => {
+  console.log("Disconnected");
+});
+
+socketIO.on("reconnect", () => {
+  console.log("Reconnecting");
+});
+
