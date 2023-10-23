@@ -76,6 +76,11 @@ process.on('SIGINT', function () {                //on ctrl+c
 
 
 const socketIO = io(API);
+
+socketIO.on("connect", ()=>{
+  console.log("connected", socketIO?.id);
+});
+
 socketIO.on("product", (data) => {
   console.log("data", data);  // { product_id:""}
   if(data?.product_id){
