@@ -60,9 +60,14 @@ textarea {
 	border-radius: 0.5rem;
 }
 
+textarea {
+	min-height: 200px;
+}
+
 label,
 button {
 	margin-top: 1rem;
+	cursor: pointer;
 }
 
 button {
@@ -108,6 +113,16 @@ button {
 	font-weight: bold;
 	padding: 0.5rem;
 	margin-bottom: 0.5rem;
+}
+
+
+.successmsg {
+	background-color: white;
+	color: green;
+	font-weight: bold;
+	padding: 0.5rem;
+	margin-bottom: 0.5rem;
+	text-align: center;
 }
 
 .line {

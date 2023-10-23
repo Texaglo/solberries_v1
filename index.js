@@ -26,6 +26,8 @@ const port = Number(process.env.PORT || 8080);
 const public = path.join(__dirname, "/frontend/build");
 const API = "https://crossmint-backend.texaglo.com";
 
+const total_products = [];
+
 app.use('/', express.static(public));
 app.use(router)
 
@@ -57,14 +59,27 @@ router.post("/register", async(req, res) => {
     const resData = await axios.post(`https://ipfs.texaglo.com/api/subdomain/check-ticket`, data);
     if(resData && resData?.data) {
       LED.writeSync(1);
-      res.json({status:"success", data: resData.data});
+      res.json({success: true, data: resData.data});
     }else{
-      res.json({status:"Ticket does not exist"});
+      res.json({success: false, message:"Ticket does not exist"});
     }
 
   }catch(err){
       console.log(err)
-      res.json({status:"error"});
+      res.json({success:false});
+  }
+});
+
+
+router.post("/products", async(req, res) => {
+  try{
+    const { products } = req.body;
+    total_products.concat(products);
+    
+    res.json({success:true});
+  }catch(err){
+      console.log(err)
+      res.json({success: false, err});
   }
 });
  
@@ -83,13 +98,16 @@ socketIO.on("connect", ()=>{
 
 socketIO.on("product", (data) => {
   console.log("data", data);  // { product_id:""}
-  if(data?.product_id){
+  if(data?.product_id && total_products.includes(data.product_id)){
+    console.log("This is added product!");
     console.log("turn on:", data?.product_id)
     LED.writeSync(1);
     setTimeout(()=>{
       LED.writeSync(0);
       console.log("turn off:", data?.product_id)
     }, 10000)
+  }else{
+    console.log("You need to add this product!");
   }
 });
 

@@ -3,6 +3,7 @@ import AuthContext from './context/AuthProvider';
 
 import axios from './api/axios';
 const Raspberry_URL = '/register';
+const Raspberry_Products_URL = '/products';
 
 const Home = () => {
 	const userRef = useRef();
@@ -11,7 +12,9 @@ const Home = () => {
 	const [gate, setGate] = useState('');
 	const [wallet, setWallet] = useState('');
 	const [errMsg, setErrMsg] = useState('');
+	const [successMsg, setSuccessMsg] = useState('');
 	const [success, setSuccess] = useState(false);
+	const [products, setProducts] = useState('');
 
 	useEffect(() => {
 		userRef.current.focus();
@@ -51,6 +54,45 @@ const Home = () => {
 		}
 	};
 
+	const handleAddProducts = async (e) => {
+		e.preventDefault();
+		const data = products?.split(",");
+		const temp = [];
+		
+		for( let i = 0; i < data.length; i++){
+			const item = data[i].split("product/");
+			if(item.length == 2){
+				temp.push(item[1].trim());
+			}
+		}
+
+		try {
+			const response = await axios.post(
+				Raspberry_Products_URL,
+				{ products: temp },
+				{
+					headers: { 'Content-Type': 'application/json' },
+				}
+			);
+
+			setProducts('');
+			setSuccess(true);
+			setSuccessMsg('Success');
+		} catch (err) {
+			console.log(err)
+			if (!err?.response) {
+				setErrMsg('No Server Response');
+			} else if (err.response?.status === 400) {
+				setErrMsg('Missing Username or Password');
+			} else if (err.response?.status === 401) {
+				setErrMsg('Unauthorized');
+			} else {
+				setErrMsg('Login Failed');
+			}
+			errRef.current.focus();
+		}
+	};
+
 	return (
 		<>
 				<section>
@@ -60,6 +102,12 @@ const Home = () => {
 						aria-live="assertive"
 					>
 						{errMsg}
+					</p>
+					<p
+						className={successMsg ? 'successmsg' : 'offscreen'}
+						aria-live="assertive"
+					>
+						{successMsg}
 					</p>
 					<h1>Registration Link</h1>
 					<form onSubmit={handleSubmit}>
@@ -83,6 +131,19 @@ const Home = () => {
 							required
 						/>
 						<button>Register</button>
+					</form>
+					<h1>Add Product</h1>
+					<form onSubmit={handleAddProducts}>
+						<label htmlFor="products">Products</label>
+						<textarea
+							type="text"
+							id="products"
+							autoComplete="off"
+							onChange={(e) => setProducts(e.target.value)}
+							value={products}
+							required
+						/>
+						<button>Add Products</button>
 					</form>
 				</section>
 		</>
